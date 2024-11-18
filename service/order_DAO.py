@@ -112,6 +112,7 @@ def add_order(id, body,db:Session):
             raise ValueError("Cart not found for customerId: {}".format(id))
         # Tạo mới đơn hàng
         new_order = Order(
+            id=body["orderId"],
             paymentId=body["paymentId"],
             shipmentId=body["shipmentId"],
             voucherId=body["voucherId"],
@@ -154,3 +155,9 @@ def reviewed_order(id,db:Session):
 def accept_order(id,db:Session):
     db.query(Order).filter(Order.id == id).update({Order.payStatus: 1})
     db.commit()
+
+def check_order_exist(orderId,db:Session):
+    result = db.query(Order).filter_by(id=orderId).first()
+    if result:
+        return True
+    return False

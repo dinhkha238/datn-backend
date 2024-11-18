@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
-from router import user_Rest
+from router import user_Rest, vnpay_Rest
 from router import product_Rest
 from router import product_item_Rest
 from router import cart_Rest
@@ -23,6 +23,7 @@ app.include_router(shipment_Rest.router)
 app.include_router(voucher_Rest.router)
 app.include_router(payment_Rest.router)
 app.include_router(feedback_Rest.router)
+app.include_router(vnpay_Rest.router)
 
 # Add CORS middleware to allow all origins
 origins = ["*"]

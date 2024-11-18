@@ -11,6 +11,7 @@ from sqlalchemy import Column, Integer, String, Float
 from dbconnect import Base
 
 class OrderBase(BaseModel):
+    orderId: str
     employeeId: Optional[int] = None
     paymentId: int
     shipmentId: int
@@ -26,7 +27,7 @@ class OrderBase(BaseModel):
 class Order(Base):
     __tablename__ = 'order'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(String(255), primary_key=True)
     employeeId = Column(Integer, nullable=True)
     paymentId = Column(Integer, nullable=True)
     shipmentId = Column(Integer, nullable=True)
