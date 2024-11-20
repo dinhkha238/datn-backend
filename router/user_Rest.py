@@ -5,7 +5,7 @@ from dbconnect import SessionLocal
 from model.user import UserBase
 from security.security import validate_token
 from service.services import generate_token
-from service.user_DAO import all_users, check_customer, create_user, delete_user, info_customer, existing_customer, update_user
+from service.user_DAO import all_users, check_customer, check_employee, create_user, delete_user, info_customer, existing_customer, update_user
 
 load_dotenv()
 secret_url_api = os.environ.get('SECURITY_URL_API')
@@ -48,6 +48,15 @@ async def post_check_customer(body:UserBase = Body(...),db = Depends(get_db)):
     if customer:
         token = generate_token(customer.id)
         return {'token': token}
+    # Nếu thông tin đăng nhập không hợp lệ, trả về lỗi 401 Unauthorized
+    raise HTTPException(status_code=401, detail='Đăng nhập không thành công')
+
+@router.post("/login-manager", tags=["Users"])
+async def post_check_employee(body:UserBase = Body(...),db = Depends(get_db)):
+    body = body.dict()
+    employee = check_employee(body['username'], body['password'],db)
+    if employee:
+        return {"data":employee}
     # Nếu thông tin đăng nhập không hợp lệ, trả về lỗi 401 Unauthorized
     raise HTTPException(status_code=401, detail='Đăng nhập không thành công')
     

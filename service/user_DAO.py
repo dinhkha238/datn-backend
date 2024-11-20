@@ -1,6 +1,7 @@
 # from database import Database
 from database import create_connection
 from model.customer import Customer
+from model.employee import Employee
 from model.user import User
 from sqlalchemy.orm import Session
 
@@ -13,6 +14,14 @@ def check_customer(username, password, db:Session):
         customer = db.query(Customer).filter(Customer.userId == user.id).first()
         if customer:
             return customer
+    return None
+
+def check_employee(username, password, db:Session):
+    user = db.query(User).filter(User.username == username, User.password == password).first()
+    if user:
+        employee = db.query(Employee).filter(Employee.userId == user.id).first()
+        if employee:
+            return employee
     return None
 
 def existing_customer(username, db:Session):
