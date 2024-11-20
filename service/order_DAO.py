@@ -42,7 +42,7 @@ def all_orders(month_year,db:Session):
         new_order = vars(order)
         new_order.update({"totalOrder": totalOrder})
         list_orders.append(new_order)
-    return list_orders
+    return list_orders[::-1]
     
 def order_by_id(order_id,db:Session):
     result = db.query(Order).filter_by(id=order_id).first()
@@ -101,7 +101,7 @@ def my_orders(id,db:Session):
             new_order = vars(order)
             new_order.update({"totalOrder": totalOrder, "payment": payment, "shipment": shipment, "voucher": voucher, "cart": cart})
             list_orders.append(new_order)
-    return list_orders
+    return list_orders[::-1]
     
     
 def add_order(id, body,db:Session):
