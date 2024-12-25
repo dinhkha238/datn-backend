@@ -12,6 +12,7 @@ from service.product_DAO import product_by_id
 from fuzzywuzzy import fuzz
 from sqlalchemy.orm import Session
 from sqlalchemy import func,extract
+from sqlalchemy.sql.expression import or_
 
 
 def product_items(option, filter, sort, db:Session):
@@ -240,4 +241,23 @@ def delete_product(id, db:Session):
         db.delete(product)
         db.commit()
     return
+
+def get_list_product_similar(top_similar_images, db: Session):
+    filters = [Product.url.contains(c) for c in top_similar_images]
+    results = db.query(Product).filter(or_(*filters)).all()
+    if not results:
+        return []
+    list_product = []
+    for product in results:
+        list_product.append(product.id)
+    list_product = db.query(ProductItem).filter(ProductItem.productId.in_(list_product)).all()
+
+    list_product_item = []
+    for product_item in list_product:
+        product = product_by_id(product_item.productId, db)
+        new_product_item = vars(product_item)
+        new_product_item.update(vars(product))
+        list_product_item.append(product_item)
+
+    return list_product_item
     

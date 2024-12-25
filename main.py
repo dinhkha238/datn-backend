@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from router import user_Rest, vnpay_Rest
@@ -13,6 +14,9 @@ from router import feedback_Rest
 
 # Khởi tạo ứng dụng FastAPI
 app = FastAPI()
+
+# Công khai thư mục chứa ảnh output
+app.mount("/images/San_pham", StaticFiles(directory="images/San_pham"), name="images")
 
 app.include_router(user_Rest.router)
 app.include_router(product_Rest.router)

@@ -21,6 +21,7 @@ def check_employee(username, password, db:Session):
     if user:
         employee = db.query(Employee).filter(Employee.userId == user.id).first()
         if employee:
+            employee.user = user
             return employee
     return None
 
