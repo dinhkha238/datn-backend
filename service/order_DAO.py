@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 
-def all_orders(month_year,db:Session):
+def all_orders(month_year, db: Session, page: int, page_size: int):
     if month_year == "all" or month_year == "":
         results = db.query(Order).all()
         
@@ -42,7 +42,19 @@ def all_orders(month_year,db:Session):
         new_order = vars(order)
         new_order.update({"totalOrder": totalOrder})
         list_orders.append(new_order)
-    return list_orders[::-1]
+    
+    # Sắp xếp danh sách theo createdAt giảm dần
+    sorted_orders = sorted(list_orders, key=lambda x: x['createdAt'], reverse=True)
+
+     # Tổng số đơn hàng
+    total_items = len(sorted_orders)
+
+    # Phân trang
+    start = (page - 1) * page_size
+    end = start + page_size
+    paginated_orders = sorted_orders[start:end]
+    
+    return paginated_orders, total_items
     
 def order_by_id(order_id,db:Session):
     result = db.query(Order).filter_by(id=order_id).first()

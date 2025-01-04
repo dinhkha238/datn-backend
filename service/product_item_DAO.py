@@ -1,4 +1,9 @@
 
+from datetime import datetime
+import os
+import random
+import string
+from fastapi import UploadFile
 from database import create_connection
 from model.cart import Cart
 from model.cart_product_item import CartProductItem
@@ -182,6 +187,7 @@ def monthly_revenue(db:Session, year):
     return monthly_revenues
 
 def add_product(product: ProductItemBase, db:Session):
+    today = datetime.now().strftime('%Y/%m/%d')
     product_new = Product(
         name = product.name,
         summary = product.summary,
@@ -193,7 +199,9 @@ def add_product(product: ProductItemBase, db:Session):
         series = product.series,
         discriminator = product.discriminator,
         employeeId = 1,
-        url = product.url
+        url = product.url,
+        spec = product.spec,
+        releaseDate = today
     )
     db.add(product_new)
     db.commit()
@@ -210,6 +218,22 @@ def add_product(product: ProductItemBase, db:Session):
 
     return product_item
 
+def save_image(file: UploadFile):
+    # Generate random filename
+    random_name = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+    file_extension = file.filename.split(".")[-1]
+    file_name = f"{random_name}.{file_extension}"
+
+    # Save the file
+    dir_path = "./images/San_pham"
+    os.makedirs(dir_path, exist_ok=True)
+    file_path = os.path.join(dir_path, file_name)
+    with open(file_path, "wb") as image:
+        image.write(file.file.read())
+
+    # Return the accessible URL
+    return f"http://localhost:8000/images/San_pham/{file_name}"
+
 def update_product(id, product: ProductItemBase, db:Session):
     product_new = db.query(Product).filter(Product.id == id).first()
     product_new.name = product.name
@@ -222,6 +246,7 @@ def update_product(id, product: ProductItemBase, db:Session):
     product_new.series = product.series
     product_new.discriminator = product.discriminator
     product_new.url = product.url
+    product_new.spec = product.spec
     db.commit()
 
     product_item = db.query(ProductItem).filter(ProductItem.productId == id).first()

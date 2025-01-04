@@ -19,9 +19,25 @@ def get_db():
         db.close()
 
 @router.get("/get-all-orders", tags=["Order"])
-async def get_all_orders(month_year:str="",db = Depends(get_db)):
-    order = all_orders(month_year,db)
-    return order
+async def get_all_orders(
+    month_year: str = "", 
+    page: int = 1, 
+    page_size: int = 10, 
+    db = Depends(get_db)
+):
+    if page < 1 or page_size < 1:
+        return {"error": "Page and page_size must be greater than 0"}
+    
+    orders, total_items = all_orders(month_year, db, page, page_size)
+
+    # Tính tổng số trang
+    total_pages = (total_items + page_size - 1) // page_size
+
+    return {
+        "page": page,
+        "total_pages": total_pages,
+        "orders": orders
+    }
 
 @router.get("/get-order-by-id/{order_id}", tags=["Order"])
 async def get_order_by_id(order_id: str,db = Depends(get_db)):

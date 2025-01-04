@@ -1,6 +1,7 @@
 from datetime import datetime
+import json
 import os
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 import numpy as np
 from tensorflow.keras.preprocessing import image
@@ -9,7 +10,7 @@ from scipy.spatial.distance import cosine
 
 from dbconnect import SessionLocal
 from model.product_item import ProductItemBase
-from service.product_item_DAO import add_product, delete_product, get_list_product_similar, monthly_revenue, product_item_by_id, product_items, statistic_product_item, update_product, user_spending_info
+from service.product_item_DAO import add_product, delete_product, get_list_product_similar, monthly_revenue, product_item_by_id, product_items, save_image, statistic_product_item, update_product, user_spending_info
 
 # Tải mô hình đã lưu
 model = load_model("my_model.h5")
@@ -54,13 +55,47 @@ async def get_user_spending_info(yy_mm:str = "",db = Depends(get_db)):
     return list_user_spending_info
 
 @router.post("/add-product", tags=["Product-Item"])
-async def post_add_product(product: ProductItemBase, db = Depends(get_db)):
-    add_product(product, db)
+async def post_add_product(
+    product: str = Form(...), 
+    file: UploadFile = File(...), 
+    db = Depends(get_db)
+):
+    try:
+        # Parse JSON product string thành dict
+        product_data = json.loads(product)
+        # Parse dict thành ProductItemBase
+        product_obj = ProductItemBase(**product_data)
+    except json.JSONDecodeError as e:
+        return {"error": f"Invalid JSON: {e}"}
+    
+    # Save the uploaded file
+    file_path = save_image(file)
+    product_obj.url = file_path
+
+    # Add product to DB
+    add_product(product_obj, db)
     return {'message': 'Thêm sản phẩm thành công'}
 
 @router.put("/update-product/{id}", tags=["Product-Item"])
-async def put_update_product(id:int, product: ProductItemBase, db = Depends(get_db)):
-    update_product(id, product, db)
+async def put_update_product(
+    id:int, 
+    product: str = Form(...), 
+    file: UploadFile = File(...), 
+    db = Depends(get_db)
+):
+    try:
+        # Parse JSON product string thành dict
+        product_data = json.loads(product)
+        # Parse dict thành ProductItemBase
+        product_obj = ProductItemBase(**product_data)
+    except json.JSONDecodeError as e:
+        return {"error": f"Invalid JSON: {e}"}
+    
+    # Save the uploaded file
+    file_path = save_image(file)
+    product_obj.url = file_path
+
+    update_product(id, product_obj, db)
     return {'message': 'Cập nhật sản phẩm thành công'}
 
 @router.delete("/delete-product/{id}", tags=["Product-Item"])
