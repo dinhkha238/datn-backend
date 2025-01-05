@@ -14,7 +14,6 @@ from sqlalchemy import func
 def all_orders(month_year, db: Session, page: int, page_size: int):
     if month_year == "all" or month_year == "":
         results = db.query(Order).all()
-        
     else:
         results = db.query(Order).filter(
             func.date_format(Order.createdAt, '%Y-%m') == month_year
@@ -143,14 +142,6 @@ def add_order(id, body,db:Session):
         )
         db.add(new_cart)
         
-        # Lấy danh sách sản phẩm trong giỏ hàng
-        product_in_cart = list_cart_product_item_by_cart_id(cart.id, db)
-        
-        # Giảm số lượng sản phẩm trong bảng product_item
-        for item in product_in_cart:
-            print(item)
-            db.query(ProductItem).filter_by(productId=item["productItemId"]).update({"inStock": ProductItem.inStock - item["quantity"]})
-        
         db.commit()
     except Exception as e:
         db.rollback()
@@ -164,8 +155,17 @@ def reviewed_order(id,db:Session):
     db.query(Order).filter(Order.id == id).update({Order.payStatus: 2})
     db.commit()
 
-def accept_order(id,db:Session):
-    db.query(Order).filter(Order.id == id).update({Order.payStatus: 1})
+def accept_order(order_id, db:Session):
+    result = db.query(Order).filter_by(id = order_id).first()
+    # Lấy danh sách sản phẩm trong giỏ hàng
+    product_in_cart = list_cart_product_item_by_cart_id(result.cartId, db)
+    
+    # Giảm số lượng sản phẩm trong bảng product_item
+    for item in product_in_cart:
+        db.query(ProductItem).filter_by(productId=item["productItemId"]).update({"inStock": ProductItem.inStock - item["quantity"]})
+    
+    db.query(Order).filter(Order.id == order_id).update({Order.payStatus: 1})
+
     db.commit()
 
 def check_order_exist(orderId,db:Session):
