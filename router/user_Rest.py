@@ -38,7 +38,7 @@ async def post_create_user(body:UserBase = Body(...),db = Depends(get_db)):
     customer = existing_customer(body['username'],db)
     if customer:
         raise HTTPException(status_code=400, detail='Tài khoản đã tồn tại')
-    create_user(body['fullname'],body['username'], body['password'],body['contact'],body['address'],body['gender'],body['birth'],db)
+    create_user(body['fullname'],body['username'], body['password'],body['contact'],body['address'],body['gender'],body['birth'],body['role'],db)
     return {'message': 'Tạo tài khoản thành công'}
 
 @router.post("/login", tags=["Users"])
@@ -66,8 +66,8 @@ async def put_update_user(id:str,body:UserBase = Body(...),db = Depends(get_db))
     update_user(id,body,db)
     return {'message': 'Cập nhật thông tin thành công'}
     
-@router.delete("/delete-user/{id}", tags=["Users"])
-async def delete_delete_user(id:str, db = Depends(get_db)):
-    delete_user(id,db)
+@router.delete("/delete-user/{id}/{role}", tags=["Users"])
+async def delete_delete_user(id:str, role:str, db = Depends(get_db)):
+    delete_user(id,role,db)
     return {'message': 'Xóa tài khoản thành công'}
 

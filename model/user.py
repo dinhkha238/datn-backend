@@ -11,6 +11,7 @@ class UserBase(BaseModel):
     birth: Optional[str] = None
     address: Optional[str] = None
     contact: Optional[str] = None
+    role: Optional[str] = None
 
 class User(Base):
     __tablename__ = 'user'
