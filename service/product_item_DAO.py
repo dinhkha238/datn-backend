@@ -88,7 +88,7 @@ def statistic_product_item(db:Session, yy_mm):
     ProductItem, CartProductItem.productItemId == ProductItem.id
 ).filter(
         Order.payStatus > 0,
-        Order.createdAt.startswith(yy_mm)
+        func.date_format(Order.createdAt, '%Y-%m') == yy_mm
 
     ).group_by(
         CartProductItem.productItemId
@@ -140,7 +140,8 @@ def user_spending_info(db: Session,yy_mm):
             ProductItem, CartProductItem.productItemId == ProductItem.id
         ).filter(
             Order.payStatus > 0,  # Assuming payStatus > 0 indicates a paid order
-            Order.createdAt.startswith(yy_mm)
+            func.date_format(Order.createdAt, '%Y-%m') == yy_mm
+
         ).group_by(
             User.id, User.fullname
         ).all()
