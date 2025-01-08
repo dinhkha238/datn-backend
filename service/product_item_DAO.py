@@ -20,7 +20,7 @@ from sqlalchemy import func,extract
 from sqlalchemy.sql.expression import or_
 
 
-def product_items(option, filter, sort, db:Session):
+def product_items(option, filter, sort, filter_price, db:Session):
     if(option == "All"):
         list_product = db.query(ProductItem).all()
     else:
@@ -46,6 +46,23 @@ def product_items(option, filter, sort, db:Session):
         threshold = 60
         # Lọc các sản phẩm dựa trên độ tương đồng của tên
         list_product_item = [product_item for product_item in list_product_item if fuzz.partial_ratio(filter, product_item.name.lower()) >= threshold]
+    
+    if filter_price is not None:
+        try:
+            # Tách filter_price theo dấu "-"
+            price_range = filter_price.split('-')
+            if len(price_range) != 2:
+                raise ValueError("Invalid format for filter_price. Expected 'giá 1 - giá 2'.")
+            
+            # Chuyển đổi giá trị chuỗi thành số
+            min_price = float(price_range[0].strip())
+            max_price = float(price_range[1].strip())
+            
+            # Lọc sản phẩm theo khoảng giá
+            list_product_item = [product_item for product_item in list_product_item if min_price <= product_item.price <= max_price]
+        except ValueError as e:
+            raise ValueError(f"Invalid format for filter_price: {filter_price}. Expected 'giá 1 - giá 2'. Error: {e}")
+    
     if sort != None:
         # if sort = "option2" => sort by name
         if sort == "option2":

@@ -30,8 +30,8 @@ def get_db():
         db.close()
 
 @router.get("/get-product-items", tags=["Product-Item"])
-async def get_product_items(option: str, filter: str = None, sort: str = None, db = Depends(get_db)):
-    items = product_items(option, filter, sort, db)
+async def get_product_items(option: str, filter: str = None, sort: str = None, filter_price: str = None, db = Depends(get_db)):
+    items = product_items(option, filter, sort, filter_price, db)
     return items
 
 @router.get("/get-product-item/{id}", tags=["Product-Item"])
